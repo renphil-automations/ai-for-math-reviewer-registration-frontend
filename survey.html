@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Reviewer Registration</title>
+  
+  <!-- SurveyJS Styles -->
+  <link href="https://unpkg.com/survey-core/survey-core.min.css" type="text/css" rel="stylesheet">
+  
+  <!-- SurveyJS Scripts -->
+  <script type="text/javascript" src="https://unpkg.com/survey-core/survey.core.min.js"></script>
+  <script type="text/javascript" src="https://unpkg.com/survey-js-ui/survey-js-ui.min.js"></script>
+
+  <script type="text/javascript" src="constants.js"></script>
+  
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f5f5f5;
+      padding: 40px 20px;
+    }
+    
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .logo-container {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+    
+    .logo {
+      height: 80px;
+      width: auto;
+      object-fit: contain;
+      max-width: 300px;
+    }
+    
+    #surveyContainer {
+      background: white;
+      padding: 40px;
+      border: 1px solid #ddd;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    /* Override SurveyJS button colors */
+    .sv-btn {
+      background-color: #FF7F50 !important;
+    }
+    
+    .sv-btn:hover {
+      background-color: #ff6a3d !important;
+    }
+
+    /* Success Message */
+    #successMessage {
+      display: none;
+      background: white;
+      padding: 60px 40px;
+      border: 1px solid #ddd;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+
+    .success-icon {
+      font-size: 80px;
+      margin-bottom: 25px;
+    }
+
+    .success-title {
+      font-size: 32px;
+      color: #333;
+      margin-bottom: 20px;
+      font-weight: 600;
+    }
+
+    .success-text {
+      font-size: 16px;
+      color: #666;
+      line-height: 1.8;
+      max-width: 500px;
+      margin: 0 auto;
+    }
+
+    /* Error Message */
+    .error-message {
+      background: white;
+      padding: 40px;
+      border: 1px solid #ddd;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+
+    .error-icon {
+      font-size: 64px;
+      margin-bottom: 20px;
+    }
+
+    .error-title {
+      font-size: 24px;
+      color: #d32f2f;
+      margin-bottom: 15px;
+      font-weight: 600;
+    }
+
+    .error-text {
+      font-size: 16px;
+      color: #666;
+      margin-bottom: 25px;
+    }
+
+    .retry-button {
+      padding: 12px 30px;
+      font-size: 14px;
+      cursor: pointer;
+      background-color: #FF7F50;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      transition: background-color 0.3s;
+    }
+
+    .retry-button:hover {
+      background-color: #ff6a3d;
+    }
+
+    /* Loading overlay */
+    .loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(255, 255, 255, 0.95);
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .loading-spinner {
+      width: 50px;
+      height: 50px;
+      border: 4px solid #f0f0f0;
+      border-top: 4px solid #FF7F50;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .loading-text {
+      margin-top: 20px;
+      font-size: 16px;
+      color: #333;
+    }
+
+    .page-content {
+      opacity: 0;
+      transition: opacity 0.3s ease-in;
+    }
+
+    .page-content.loaded {
+      opacity: 1;
+    }
+
+    /* Custom Alert Modal */
+    .custom-alert-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 10000;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .custom-alert-box {
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+      max-width: 400px;
+      width: 90%;
+      text-align: center;
+    }
+
+    .custom-alert-icon {
+      font-size: 48px;
+      margin-bottom: 15px;
+    }
+
+    .custom-alert-message {
+      font-size: 16px;
+      color: #333;
+      margin-bottom: 20px;
+      line-height: 1.5;
+    }
+
+    .custom-alert-button {
+      padding: 10px 30px;
+      font-size: 14px;
+      cursor: pointer;
+      background-color: #FF7F50;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      transition: background-color 0.3s;
+    }
+
+    .custom-alert-button:hover {
+      background-color: #ff6a3d;
+    }
+  </style>
+</head>
+<body>
+  <!-- Loading overlay -->
+  <div id="loadingOverlay" class="loading-overlay">
+    <div class="loading-spinner"></div>
+    <div class="loading-text">Loading registration form...</div>
+  </div>
+
+  <div class="page-content" id="pageContent">
+    <div class="container">
+      <!-- Logo -->
+      <div class="logo-container">
+        <img src="media/Logo.png" alt="Reviewer Registration Portal" class="logo">
+      </div>
+      
+      <!-- Survey Container -->
+      <div id="surveyContainer"></div>
+      
+      <!-- Success Message -->
+      <div id="successMessage">
+        <div class="success-icon">✅</div>
+        <div class="success-title">Thank You!</div>
+        <div class="success-text">
+          Your registration has been submitted successfully. We appreciate your interest in becoming a reviewer and will be in touch soon.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Custom Alert Modal -->
+  <div id="customAlertOverlay" class="custom-alert-overlay">
+    <div class="custom-alert-box">
+      <div class="custom-alert-icon">⚠️</div>
+      <div id="customAlertMessage" class="custom-alert-message"></div>
+      <button class="custom-alert-button" onclick="closeCustomAlert()">OK</button>
+    </div>
+  </div>
+
+  <script>
+    // Custom alert functions
+    function showCustomAlert(message) {
+      document.getElementById("customAlertMessage").textContent = message;
+      document.getElementById("customAlertOverlay").style.display = "flex";
+    }
+
+    function closeCustomAlert() {
+      document.getElementById("customAlertOverlay").style.display = "none";
+    }
+
+    let survey;
+
+    // Load survey schema from backend
+    async function loadSurvey() {
+      try {
+        const response = await fetch(`${API_BASE}/survey-schema`);
+        
+        if (!response.ok) {
+          throw new Error("Failed to load survey schema");
+        }
+
+        const schema = await response.json();
+        console.log("Loaded schema:", schema);
+
+        // Initialize SurveyJS model
+        survey = new Survey.Model(schema);
+        
+        // Apply custom theme
+        survey.applyTheme({
+          "cssVariables": {
+            "--sjs-primary-backcolor": "#FF7F50",
+            "--sjs-primary-backcolor-dark": "#ff6a3d",
+            "--sjs-primary-backcolor-light": "#fff5f2"
+          }
+        });
+
+        // Survey completion handler
+        survey.onCompleting.add(async (sender, options) => {
+          // Prevent default completion
+          options.allowComplete = false;
+          
+          try {
+            const response = await fetch(`${API_BASE}/submit`, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json"
+              },
+              body: JSON.stringify({
+                answers: sender.data
+              })
+            });
+
+            if (!response.ok) {
+              const result = await response.json();
+              throw new Error(result.error || "Failed to submit registration");
+            }
+
+            // Only show success message if submission was successful
+            document.getElementById("surveyContainer").style.display = "none";
+            document.getElementById("successMessage").style.display = "block";
+
+          } catch (err) {
+            console.error("Error submitting survey:", err.message);
+            showCustomAlert(err.message || "An error occurred while submitting your registration. Please try again.");
+          }
+        });
+
+        // Render survey
+        survey.render(document.getElementById("surveyContainer"));
+
+        // Hide loading overlay and show content
+        setTimeout(() => {
+          document.getElementById("loadingOverlay").style.display = "none";
+          document.getElementById("pageContent").classList.add("loaded");
+        }, 300);
+
+      } catch (error) {
+        console.error("Error loading survey:", error);
+        
+        // Hide loading overlay
+        document.getElementById("loadingOverlay").style.display = "none";
+        document.getElementById("pageContent").classList.add("loaded");
+        
+        // Show error message
+        document.getElementById("surveyContainer").innerHTML = `
+          <div class="error-message">
+            <div class="error-icon">❌</div>
+            <div class="error-title">Failed to Load Registration Form</div>
+            <div class="error-text">${error.message}</div>
+            <button class="retry-button" onclick="location.reload()">Retry</button>
+          </div>
+        `;
+      }
+    }
+
+    // Load survey when page loads
+    window.addEventListener("DOMContentLoaded", loadSurvey);
+  </script>
+</body>
+</html>
