@@ -305,6 +305,12 @@
           }
         });
 
+        // Default billing name
+        let billingManuallyEdited = {
+          name: false,
+          address: false
+        };
+
         // Survey completion handler
         survey.onCompleting.add(async (sender, options) => {
           // Prevent default completion
