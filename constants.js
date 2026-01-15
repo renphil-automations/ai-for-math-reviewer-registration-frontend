@@ -1,1 +1,1 @@
-API_BASE="http://localhost:8080";
+API_BASE="https://ai-for-math-reviewer-registration-form-be-610550122857.us-central1.run.app/";
