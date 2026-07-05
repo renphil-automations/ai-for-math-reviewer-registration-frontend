@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <link href="https://db.onlinewebfonts.com/c/4cae543bca37f9c0d67178805b31cbb1?family=Plain-Ultralight"
+    rel="stylesheet">
+  <title>Login - Application Portal</title>
+  <style>
+    body {
+      font-family: "Plain-Ultralight", sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: #f5f5f5;
+    }
+
+    .logo-container {
+      text-align: center;
+      margin-bottom: 30px;
+      padding-top: 20px;
+    }
+
+    .logo {
+      height: 80px;
+      width: auto;
+      object-fit: contain;
+      max-width: 250px;
+    }
+
+    .container {
+      max-width: 500px;
+      margin: 0 auto 50px;
+      background: white;
+      padding: 40px;
+      border: 1px solid #ddd;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    h2 {
+      color: #333;
+      margin-top: 0;
+      margin-bottom: 30px;
+      font-size: 28px;
+      text-align: center;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      color: #555;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    input {
+      padding: 12px;
+      width: 100%;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 14px;
+      box-sizing: border-box;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: #FF7F50;
+    }
+
+    button {
+      padding: 12px 24px;
+      width: 100%;
+      margin-top: 10px;
+      font-size: 16px;
+      cursor: pointer;
+      background-color: #FF7F50;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      transition: background-color 0.3s;
+    }
+
+    button:hover {
+      background-color: #ff6a3d;
+    }
+
+    button:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }
+
+    #error {
+      color: #d32f2f;
+      margin-top: 15px;
+      text-align: center;
+      font-size: 14px;
+    }
+
+    #success {
+      color: #2e7d32;
+      margin-top: 15px;
+      text-align: center;
+      font-size: 14px;
+    }
+
+    .error-message {
+      text-align: center;
+      padding: 20px;
+    }
+
+    .error-icon {
+      font-size: 48px;
+      margin-bottom: 15px;
+    }
+
+    .error-title {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+
+    .error-text {
+      color: #555;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    /* Loading overlay */
+    .loading-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(255, 255, 255, 0.95);
+      z-index: 9999;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .loading-spinner {
+      width: 50px;
+      height: 50px;
+      border: 4px solid #f0f0f0;
+      border-top: 4px solid #FF7F50;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
+      }
+
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+
+    .loading-text {
+      margin-top: 20px;
+      font-size: 16px;
+      color: #333;
+    }
+  </style>
+
+  <script type="text/javascript" src="constants.js"></script>
+</head>
+
+<body>
+
+  <!-- Loading overlay -->
+  <div id="loadingOverlay" class="loading-overlay">
+    <div class="loading-spinner"></div>
+    <div class="loading-text">Signing in...</div>
+  </div>
+
+  <div class="logo-container">
+    <img src="media/Logo.png" alt="Application Portal Logo" class="logo">
+    <h1 class="site-title">AI for Math Fund</h1>
+    <h3>Reviewer Registration</h3>
+  </div>
+
+  <div class="container" id="surveyContainer">
+    <h2>Sign In</h2>
+
+    <form id="loginForm" onsubmit="handleLogin(event)">
+      <div class="form-group">
+        <label for="email">Email Address</label>
+        <input type="email" id="email" name="email" placeholder="Enter your email" required />
+      </div>
+
+      <div class="form-group">
+        <label for="passcode">Passcode</label>
+        <input type="password" id="passcode" name="passcode" placeholder="Enter your passcode" required />
+      </div>
+
+      <button type="submit" id="signInButton">
+        Sign In
+      </button>
+    </form>
+
+    <p id="error"></p>
+    <p id="success"></p>
+  </div>
+
+  <p
+    style="max-width: 420px; margin: 16px auto 0; text-align: center; font-size: 13px; color: #64748b; line-height: 1.6;">
+    Your login credentials have been e-mailed to you by the AI for Math program team. If you do not have credentials,
+    please reach out to <a href="mailto:aiformath@renphil.org"
+      style="color: #FF7F50; text-decoration: none;">aiformath@renphil.org</a>.
+  </p>
+
+  <script>
+
+    document.addEventListener('DOMContentLoaded', async function () {
+      const loadingOverlay = document.getElementById("loadingOverlay");
+      const signInButton = document.getElementById("signInButton");
+      const surveyContainer = document.getElementById("surveyContainer");
+      const errorElement = document.getElementById("error");
+
+      // Show loading while verifying form status
+      loadingOverlay.style.display = "flex";
+      signInButton.disabled = true;
+
+      try {
+        const resp = await fetch(`${API_BASE}/form-status`, { method: 'GET' });
+
+        if (resp.status === 403) {
+          const data = await resp.json().catch(() => ({}));
+          const msg = data.message || "This form is currently disabled";
+          const reason = data.reason || data.details || "";
+          // Hide loading overlay and keep sign-in disabled when form is unavailable
+          loadingOverlay.style.display = "none";
+          signInButton.disabled = true;
+          surveyContainer.innerHTML = `
+            <div class="error-message">
+              <div class="error-icon">🔒</div>
+              <div class="error-title" style="color: #FF7F50;">Form Currently Unavailable</div>
+              <div class="error-text">${msg}</div>
+              ${reason ? `<div class="error-text" style="margin-top: 8px; color: #6b7280;">Reason: ${reason}</div>` : ""}
+            </div>
+          `;
+          return;
+        }
+
+        if (!resp.ok) {
+          throw new Error('Unable to verify form status');
+        }
+
+        // Form is available — hide loading and enable sign in
+        loadingOverlay.style.display = "none";
+        signInButton.disabled = false;
+        errorElement.textContent = "";
+
+      } catch (err) {
+        // Network or unexpected error — show a friendly message and keep sign-in disabled
+        loadingOverlay.style.display = "none";
+        signInButton.disabled = true;
+        errorElement.textContent = err.message || "Unable to verify form status. Please try again later.";
+      }
+    });
+
+    async function handleLogin(event) {
+      event.preventDefault();
+
+      const email = document.getElementById("email").value.trim();
+      const passcode = document.getElementById("passcode").value.trim();
+      const errorElement = document.getElementById("error");
+      const successElement = document.getElementById("success");
+      const signInButton = document.getElementById("signInButton");
+
+      // Clear previous messages
+      errorElement.textContent = "";
+      successElement.textContent = "";
+
+      if (!email || !passcode) {
+        errorElement.textContent = "Please enter both email and passcode";
+        return;
+      }
+
+      try {
+        // Show loading
+        document.getElementById("loadingOverlay").style.display = "flex";
+        signInButton.disabled = true;
+
+        const response = await fetch(`${API_BASE}/auth/authenticate`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, passcode })
+        });
+
+        // Handle form disabled (403 Forbidden)
+        if (response.status === 403) {
+          const data = await response.json();
+          const disabledError = new Error(data.message || "This form is currently disabled");
+          disabledError.isFormDisabled = true;
+          disabledError.reason = data.reason || data.details || "";
+          throw disabledError;
+        }
+
+        // Handle rate limit error (server is busy)
+        if (response.status === 429) {
+          throw new Error("The server is busy at this time. Please try again in 1 minute.");
+        }
+
+        if (!response.ok) {
+          const data = await response.json();
+          throw new Error(data.message || "Invalid email or passcode");
+        }
+
+        const data = await response.json();
+
+        sessionStorage.setItem("userEmail", email);
+
+        // Show success message briefly
+        successElement.textContent = "Login successful! Redirecting...";
+
+        // Redirect to application portal
+        setTimeout(() => {
+          window.location.href = "/survey.html";
+        }, 1000);
+
+      } catch (err) {
+        if (err.isFormDisabled) {
+          // Form is disabled - show info message without retry button
+          document.getElementById("loadingOverlay").style.display = "none";
+          signInButton.disabled = false;
+          document.getElementById("surveyContainer").innerHTML = `
+            <div class="error-message">
+              <div class="error-icon">🔒</div>
+              <div class="error-title" style="color: #FF7F50;">Form Currently Unavailable</div>
+              <div class="error-text">${err.message}</div>
+              ${err.reason ? `<div class="error-text" style="margin-top: 8px; color: #6b7280;">Reason: ${err.reason}</div>` : ""}
+            </div>
+          `;
+        } else {
+          document.getElementById("loadingOverlay").style.display = "none";
+          signInButton.disabled = false;
+          errorElement.textContent = err.message;
+        }
+      }
+    }
+
+    // Handle browser back button - hide loading overlay if page is shown from cache
+    window.addEventListener('pageshow', function (event) {
+      if (event.persisted || performance.getEntriesByType("navigation")[0]?.type === "back_forward") {
+        document.getElementById("loadingOverlay").style.display = "none";
+        document.getElementById("signInButton").disabled = false;
+        document.getElementById("error").textContent = "";
+        document.getElementById("success").textContent = "";
+      }
+    });
+
+  </script>
+
+</body>
+
+</html>
